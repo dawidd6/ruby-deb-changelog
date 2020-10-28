@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Setup Ruby
-        uses: actions/setup-ruby@v2
+        uses: actions/setup-ruby@v1
       - name: Install deps
         run: bundle install
       - name: Run tests
