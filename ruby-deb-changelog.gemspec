@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
 
-  spec.files = `git ls-files`.split('\n')
+  spec.files = `git ls-files`.split("\n")
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "rake", "~> 12.0"
