@@ -1,25 +1,36 @@
 class DebChangelog
-  FIRST_LINE_REGEX = /^(?<package>.+) \(((?<epoch>[0-9]+):)?(?<version>[^:-]+)(-(?<revision>[^:-]+))?\) (?<distribution>.+); (?<params>.+)$/.freeze
-  LIST_LINE_REGEX = /^ -- (?<author_name>.+) <(?<author_email>.+@.+\..+)> (?<timestamp>.+)$/.freeze
-
-  attr_reader :package, :epoch, :version, :revision, :distribution, :params
-
-  def initialize(captures)
-    @package = captures["package"]
-    @epoch = captures["epoch"]
-    @version = captures["version"]
-    @revision = captures["revision"]
-    @distribution = captures["distribution"]
-    @params = captures["params"]
-  end
+  METADATA_REGEX = /^(?<package>.+) \(((?<epoch>[0-9]+):)?(?<version>[^:-]+)(-(?<revision>[^:-]+))?\) (?<distribution>.+); (?<params>.+)$/.freeze
+  CHANGE_REGEX = /^  \* (?<message>.+)$/.freeze
+  AUTHOR_REGEX = /^ -- (?<author_name>.*) <(?<author_email>.+@.+\..+)>  (?<timestamp>.+)$/.freeze
 
   def self.parse_file(file)
-    contents = File.read(file)
-    parse(contents)
+    contents = File.read file
+    parse contents
   end
 
   def self.parse(contents)
-    captures = contents.match(FIRST_LINE_REGEX).named_captures
-    new(captures)
+    entries = []
+
+    contents.each_line do |line|
+      line.chomp!
+
+      if (metadata = line.match(METADATA_REGEX)&.named_captures)
+        entries << metadata
+        next
+      end
+
+      if (change = line.match(CHANGE_REGEX)&.named_captures)
+        entries.last["changes"] ||= []
+        entries.last["changes"] << change["message"]
+        next
+      end
+
+      if (author = line.match(AUTHOR_REGEX)&.named_captures)
+        entries.last.merge! author
+        next
+      end
+    end
+
+    entries
   end
 end
